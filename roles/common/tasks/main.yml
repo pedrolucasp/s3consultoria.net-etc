@@ -41,6 +41,7 @@
     src: doas.conf.j2
     dest: /etc/doas.conf
     mode: '0644'
+  tags: [common]
 
 - name: disable openssh debian banner
   lineinfile:
@@ -48,11 +49,13 @@
     regexp: "^#?DebianBanner"
     line: "DebianBanner no"
   notify: reload ssh
+  tags: [common]
 
 - name: ensure group "admin" exists
   ansible.builtin.group:
     name: admin
     state: present
+  tags: [common]
 
 - name: add access user
   user:
@@ -62,6 +65,7 @@
     append: yes
     shell: /bin/bash
     state: present
+  tags: [common]
 
 - name: add authorized SSH key for the access user
   authorized_key:
@@ -69,3 +73,4 @@
     key: "{{ item }}"
   with_file:
     - "{{ access_ssh_key }}"
+  tags: [common]
