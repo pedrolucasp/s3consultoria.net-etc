@@ -74,3 +74,19 @@
   with_file:
     - "{{ access_ssh_key }}"
   tags: [common]
+
+- name: disable remote root SSH login
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin no"
+  notify: reload ssh
+  tags: [sshd]
+
+- name: disable password login for SSH
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication"
+    line: "PasswordAuthentication no"
+  notify: reload ssh
+  tags: [sshd]
