@@ -48,3 +48,24 @@
     regexp: "^#?DebianBanner"
     line: "DebianBanner no"
   notify: reload ssh
+
+- name: ensure group "admin" exists
+  ansible.builtin.group:
+    name: admin
+    state: present
+
+- name: add access user
+  user:
+    name: "{{ access_user }}"
+    password: x
+    groups: admin,sudo
+    append: yes
+    shell: /bin/bash
+    state: present
+
+- name: add authorized SSH key for the access user
+  authorized_key:
+    user: "{{ access_user }}"
+    key: "{{ item }}"
+  with_file:
+    - "{{ access_ssh_key }}"
