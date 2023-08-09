@@ -1,0 +1,37 @@
+---
+- name: set hostname
+  hostname: name={{ system_hostname }}
+  when: system_hostname is defined
+  tags: [common]
+
+- name: set /etc/hostname
+  command: echo -n {{ system_hostname }} > /etc/hostname
+  when: system_hostname is defined
+  tags: [common]
+
+- name: set /etc/timezone
+  command: echo -n 'America/Sao_Paulo' > /etc/timezone
+  tags: [common]
+
+- name: reconfigure clock
+  command: dpkg-reconfigure -f noninteractive tzdata
+  tags: [common]
+
+- name: install important sysadmin packages
+  apt:
+    state: present
+    update_cache: yes
+    name:
+      - doas
+      - strace
+      - lsof
+      - ca-certificates
+      - ntp
+      - git
+      - curl
+      - vim
+      - htop
+      - iotop
+      - rsync
+      - ncdu
+  tags: [common, packages]
