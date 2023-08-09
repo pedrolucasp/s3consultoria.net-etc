@@ -35,3 +35,16 @@
       - rsync
       - ncdu
   tags: [common, packages]
+
+- name: install doas.conf
+  ansible.builtin.template:
+    src: doas.conf.j2
+    dest: /etc/doas.conf
+    mode: '0644'
+
+- name: disable openssh debian banner
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^#?DebianBanner"
+    line: "DebianBanner no"
+  notify: reload ssh
