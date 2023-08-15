@@ -1,0 +1,18 @@
+[Unit]
+Description=alps
+
+[Service]
+Type=simple
+User=alps
+
+WorkingDirectory=/usr/share/alps
+ExecStart=alps -theme alps s3consultoria.net
+Restart=always
+
+StandardOutput=journal
+StandardError=journal
+
+SyslogIdentifier=alps
+
+[Install]
+WantedBy=multi-user.target

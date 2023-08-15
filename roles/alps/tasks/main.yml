@@ -1,0 +1,31 @@
+---
+- name: create a group for alps
+  become: yes
+  group:
+    name: alps
+    state: present
+
+- name: create a group for alps
+  become: yes
+  user:
+    name: alps
+    home: "/var/empty"
+    create_home: no
+    system: "yes"
+    shell: "/bin/false"
+    group: alps
+
+- name: install the alps systemd service file
+  become: yes
+  template:
+    src: "alps.service"
+    dest: "/etc/systemd/system/alps.service"
+
+- name: start and enable yggdrasil service
+  become: yes
+  systemd:
+    name: yggdrasil
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: [service]

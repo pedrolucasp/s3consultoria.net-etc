@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become_method: doas
+
+  vars:
+    - alps_user: "{{ alps_user }}"
+
+  roles:
+    - alps
