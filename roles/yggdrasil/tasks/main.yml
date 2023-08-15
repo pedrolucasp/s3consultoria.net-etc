@@ -1,0 +1,15 @@
+---
+- name: install the yggdrasil pkg
+  apt:
+    state: present
+    update_cache: yes
+    name:
+      - yggdrasil
+  tags: [packages]
+
+- name: start and enable yggdrasil service
+  service:
+    name: yggdrasil
+    state: started
+    enabled: true
+  tags: [service]
