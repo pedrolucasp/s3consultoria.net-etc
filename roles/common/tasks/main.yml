@@ -75,6 +75,24 @@
     - "{{ access_ssh_key }}"
   tags: [common]
 
+- name: Setup unattended-upgrades
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: "^#?//Unattended-Upgrade::Mail "
+    line: 'Unattended-Upgrade::Mail "{{ access_user }}";'
+  tags: [apt]
+
+- name: Enable and start systemd services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - apt-daily.timer
+  tags: [apt]
+
+# XXX: Make sure to run these lines *after* the setup to not lock yourself out
 - name: disable remote root SSH login
   lineinfile:
     dest: /etc/ssh/sshd_config
