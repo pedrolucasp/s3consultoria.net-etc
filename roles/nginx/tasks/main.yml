@@ -7,3 +7,21 @@
     name:
       - nginx
   tags: [packages]
+
+- name: copy main nginx conf file
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+  tags:
+    - nginx
+
+- name: remove default vhost
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+  tags:
+    - nginx
