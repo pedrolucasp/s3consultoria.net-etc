@@ -1,0 +1,9 @@
+---
+- name: install nginx
+  become: yes
+  apt:
+    state: present
+    update_cache: yes
+    name:
+      - nginx
+  tags: [packages]
