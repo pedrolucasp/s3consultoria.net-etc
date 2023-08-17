@@ -1,0 +1,67 @@
+---
+- name: install uacme package
+  become: yes
+  apt:
+    state: present
+    update_cache: yes
+    name:
+      - uacme
+  tags: [packages]
+
+- name: create a group for uacme
+  become: yes
+  group:
+    state: present
+    name: acme
+
+- name: create a user for uacme
+  become: yes
+  user:
+    name: acme
+    home: "/var/lib/acme"
+    system: "yes"
+    shell: "/bin/nologin"
+    state: present
+    groups: "acme,www-data"
+
+- name: create uacme dir on /etc/ssl
+  file:
+    path: /etc/ssl/uacme
+    state: directory
+    group: acme
+    owner: acme
+    mode: "g+rX"
+
+- name: create private uacme dir on /etc/ssl
+  file:
+    path: /etc/ssl/uacme/private
+    state: directory
+    group: acme
+    owner: acme
+    mode: "g+rX"
+
+- name: create acme challenges dirs on /var/www
+  file:
+    path: /var/www/.well-known/acme-challenge
+    state: directory
+    group: acme
+    owner: acme
+
+- name: create acme log
+  file:
+    path: /var/log/acme.log
+    state: touch
+    group: acme
+    owner: acme
+
+- name: copy acme-update-certs script
+  become: yes
+  template:
+    src: acme-update-certs.j2
+    dest: /usr/local/bin/acme-update-certs
+    mode: "+x"
+  tags:
+    - nginx
+
+# TODO: generate certs for each site
+# Also, while we're at it, maybe generate a logfile for each individual?

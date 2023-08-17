@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+  become_method: doas
+
+  vars:
+    - email: "{{ email }}"
+
+  roles:
+    - nginx
+    - uacme
