@@ -63,5 +63,11 @@
   tags:
     - nginx
 
+# TODO: Not usable, needs investigation and most likely a full rewrite
+- name: renew certs
+  ansible.builtin.command: /usr/local/bin/acme-update-certs
+  tags:
+    - renew-certs
+
 # TODO: generate certs for each site
 # Also, while we're at it, maybe generate a logfile for each individual?
