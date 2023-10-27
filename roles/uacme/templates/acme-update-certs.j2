@@ -1,6 +1,4 @@
 #!/bin/sh -eu
-exec >>/var/log/acme.log 2>&1
-date
 
 stats() {
 	cert="/etc/ssl/uacme/$1/cert.pem"
@@ -10,20 +8,24 @@ stats() {
 		return
 	fi
 
-	expiration=$(date -d"$(openssl x509 -enddate -noout -in "$cert" \
-		| cut -d= -f2)" -D'%b %d %H:%M:%S %Y GMT' +'%s')
+	expiration="$(openssl x509 -enddate -noout -in "$cert" \
+		| cut -d= -f2)"
+
 	printf 'Domain %s will expire in: "%s" %s\n' "$1" "$expiration"
 }
 
 acme() {
+	exec >>/var/log/acme-$1.log 2>&1
+	date
+
 	site=$1
 	shift
 
 	/usr/bin/uacme -v -h /usr/share/uacme/uacme.sh issue $site $* || true
 
 	stats $site
+
+	echo "Done \n\n" >> "/var/log/acme-$site.log"
 }
 
-# TODO: Replace this with vars
-acme mail.s3consultoria.net
-doas nginx -s reload
+acme $1

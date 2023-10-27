@@ -1,0 +1,4 @@
+---
+vhosts:
+  - cofre.s3consultoria.net
+  - email.s3consultoria.net

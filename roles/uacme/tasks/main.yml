@@ -13,6 +13,7 @@
   group:
     state: present
     name: acme
+  tags: [prepare]
 
 - name: create a user for uacme
   become: yes
@@ -23,6 +24,7 @@
     shell: "/bin/nologin"
     state: present
     groups: "acme,www-data"
+  tags: [prepare]
 
 - name: create uacme dir on /etc/ssl
   file:
@@ -31,6 +33,7 @@
     group: acme
     owner: acme
     mode: "g+rX"
+  tags: [prepare]
 
 - name: create private uacme dir on /etc/ssl
   file:
@@ -39,6 +42,7 @@
     group: acme
     owner: acme
     mode: "g+rX"
+  tags: [prepare]
 
 - name: create acme challenges dirs on /var/www
   file:
@@ -46,13 +50,16 @@
     state: directory
     group: acme
     owner: acme
+  tags: [prepare]
 
 - name: create acme log
+  loop: "{{ vhosts }}"
   file:
-    path: /var/log/acme.log
+    path: "/var/log/acme-{{item}}.log"
     state: touch
     group: acme
     owner: acme
+  tags: [prepare, acme-install]
 
 - name: copy acme-update-certs script
   become: yes
@@ -62,12 +69,11 @@
     mode: "+x"
   tags:
     - nginx
+    - acme-install
 
-# TODO: Not usable, needs investigation and most likely a full rewrite
 - name: renew certs
-  ansible.builtin.command: /usr/local/bin/acme-update-certs
+  loop: "{{ vhosts }}"
+  ansible.builtin.command: "/usr/local/bin/acme-update-certs {{ item }}"
+  notify: nginx reload
   tags:
     - renew-certs
-
-# TODO: generate certs for each site
-# Also, while we're at it, maybe generate a logfile for each individual?

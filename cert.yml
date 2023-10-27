@@ -5,6 +5,9 @@
 
   vars:
     - email: "{{ email }}"
+  vars_files:
+    - vars/vhosts.yml
+
 
   roles:
     - nginx
