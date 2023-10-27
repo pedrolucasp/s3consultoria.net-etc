@@ -25,3 +25,13 @@
   notify: reload nginx
   tags:
     - nginx
+
+- name: install vhosts
+  become: yes
+  loop: "{{ vhosts }}"
+  template:
+    src: "{{item}}.j2"
+    dest: "/etc/nginx/sites-enabled/{{item}}.conf"
+  notify: reload nginx
+  tags:
+    - vhosts

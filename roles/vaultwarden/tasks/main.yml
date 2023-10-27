@@ -1,0 +1,15 @@
+---
+- name: add bitwarden group
+  become: yes
+  group:
+    name: bitwarden
+    state: present
+
+- name: add bitwarden user
+  become: yes
+  user:
+    name: bitwarden
+    home: "/var/lib/bitwarden"
+    groups: 'bitwarden,docker'
+    state: present
+    system: "yes"
