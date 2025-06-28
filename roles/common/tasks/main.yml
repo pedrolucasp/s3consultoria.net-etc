@@ -33,6 +33,7 @@
       - htop
       - iotop
       - rsync
+      - docker-compose
       - ncdu
   tags: [common, packages]
 
