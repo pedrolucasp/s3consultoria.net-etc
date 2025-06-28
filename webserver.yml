@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become_method: doas
+
+  vars_files:
+    - vars/vhosts.yml
+
+  roles:
+    - nginx
