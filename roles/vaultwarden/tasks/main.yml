@@ -5,6 +5,23 @@
     name: bitwarden
     state: present
 
+- name: install docker if not installed
+  become: yes
+  apt:
+    state: present
+    update_cache: yes
+    name:
+      - docker
+      - docker-compose
+  tags: [docker, packages]
+
+- name: initialize and enable the docker service
+  become: yes
+  service:
+    name: docker
+    state: started
+    enabled: true
+
 - name: add bitwarden user
   become: yes
   user:
@@ -13,6 +30,37 @@
     groups: 'bitwarden,docker'
     state: present
     system: "yes"
+
+- name: pull docker vaultwarden image
+  become: yes
+  docker_image:
+    name: vaultwarden/server
+    tag: latest
+    source: pull
+  tags: [docker, image]
+
+- name: create a persistent mountpoint for the docker volume
+  become: yes
+  file:
+    path: /vw-data
+    state: directory
+    owner: bitwarden
+    group: bitwarden
+    mode: '0755'
+
+- name: run the vaultwarden docker image
+  become: yes
+  docker_container:
+    name: vaultwarden
+    image: vaultwarden/server:latest
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - /vw-data/:/data
+    env_file: /var/lib/bitwarden/.env
+    published_ports:
+      - "8888:80"
+  tags: [docker, container]
 
 - name: install vaultwarden systemd service unit
   become: yes
@@ -29,3 +77,55 @@
     enabled: true
     daemon_reload: true
   tags: [service]
+
+- name: install the unsafe version of the nginx config file
+  become: yes
+  template:
+    src: cripta.s3consultoria.net-unsafe.conf.j2
+    dest: /etc/nginx/sites-available/cripta.s3consultoria.net-unsafe.conf
+  notify:
+    - nginx reload
+  tags: [nginx, config]
+
+- name: install the safe version of the nginx config file
+  become: yes
+  template:
+    src: cripta.s3consultoria.net.conf.j2
+    dest: /etc/nginx/sites-available/cripta.s3consultoria.net.conf
+  notify:
+    - nginx reload
+  tags: [nginx, config]
+
+- name: link the unsafe nginx config file first
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/cripta.s3consultoria.net-unsafe.conf
+    dest: /etc/nginx/sites-enabled/cripta.s3consultoria.net.conf
+    state: link
+  notify:
+    - nginx reload
+  tags: [nginx, config]
+
+- name: run uacme to obtain a certificate for this service
+  become: yes
+  command: "/usr/local/bin/acme-update-certs cripta.s3consultoria.net"
+  tags: [uacme, cert]
+
+- name: verify if the cert is valid
+  become: yes
+  command: openssl x509 -checkend 86400 -noout -in /etc/ssl/uacme/cripta.s3consultoria.net/cert.pem
+  register: cert_check
+  changed_when: false
+  failed_when: cert_check.rc != 0
+  tags: [uacme, cert]
+
+- name: link the safe nginx config file
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/cripta.s3consultoria.net.conf
+    dest: /etc/nginx/sites-enabled/cripta.s3consultoria.net.conf
+    force: yes
+    state: link
+  notify:
+    - nginx reload
+  tags: [nginx, config]
