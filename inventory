@@ -1,2 +1,5 @@
-[backup]
-bergamota ansible_host=45.156.119.19
+[servers]
+goiaba.s3consultoria.net
+
+[deprecated]
+bergamota ansible_host=89.213.134.120
