@@ -45,6 +45,7 @@
   tags: [prepare]
 
 - name: create acme challenges dirs on /var/www
+  become: yes
   file:
     path: /var/www/.well-known/acme-challenge
     state: directory
@@ -53,6 +54,7 @@
   tags: [prepare]
 
 - name: create acme log
+  become: yes
   loop: "{{ vhosts }}"
   file:
     path: "/var/log/acme-{{item}}.log"

@@ -1,13 +1,11 @@
 ---
 - hosts: all
-  become: yes
   become_method: doas
 
   vars:
-    - email: "{{ email }}"
+    email: "{{ email }}"
   vars_files:
     - vars/vhosts.yml
-
 
   roles:
     - nginx
