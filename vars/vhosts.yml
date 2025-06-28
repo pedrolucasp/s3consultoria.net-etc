@@ -3,7 +3,9 @@ vhosts:
   - s3consultoria.net
   - cofre.s3consultoria.net
   - email.s3consultoria.net
+  - cripta.s3consultoria.net
 
 subdomains:
   - cofre
   - email
+  - cripta
