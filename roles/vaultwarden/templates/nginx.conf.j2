@@ -1,5 +1,5 @@
 server {
-	server_name cripta.s3consultoria.net;
+	server_name cofre.s3consultoria.net;
 	listen 80;
 
 	location / {
@@ -15,9 +15,9 @@ server {
 server {
 	listen 443 ssl http2;
 	listen [::]:443 ssl http2;
-	server_name cripta.s3consultoria.net;
-	ssl_certificate /etc/ssl/uacme/cripta.s3consultoria.net/cert.pem;
-	ssl_certificate_key /etc/ssl/uacme/private/cripta.s3consultoria.net/key.pem;
+	server_name cofre.s3consultoria.net;
+	ssl_certificate /etc/ssl/uacme/cofre.s3consultoria.net/cert.pem;
+	ssl_certificate_key /etc/ssl/uacme/private/cofre.s3consultoria.net/key.pem;
 
 	gzip on;
 	gzip_types text/css;

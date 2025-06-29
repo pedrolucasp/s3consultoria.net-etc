@@ -81,8 +81,8 @@
 - name: install the unsafe version of the nginx config file
   become: yes
   template:
-    src: cripta.s3consultoria.net-unsafe.conf.j2
-    dest: /etc/nginx/sites-available/cripta.s3consultoria.net-unsafe.conf
+    src: nginx-unsafe.conf.j2
+    dest: /etc/nginx/sites-available/cofre.s3consultoria.net-unsafe.conf
   notify:
     - nginx reload
   tags: [nginx, config]
@@ -90,8 +90,8 @@
 - name: install the safe version of the nginx config file
   become: yes
   template:
-    src: cripta.s3consultoria.net.conf.j2
-    dest: /etc/nginx/sites-available/cripta.s3consultoria.net.conf
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/cofre.s3consultoria.net.conf
   notify:
     - nginx reload
   tags: [nginx, config]
@@ -99,8 +99,8 @@
 - name: link the unsafe nginx config file first
   become: yes
   file:
-    src: /etc/nginx/sites-available/cripta.s3consultoria.net-unsafe.conf
-    dest: /etc/nginx/sites-enabled/cripta.s3consultoria.net.conf
+    src: /etc/nginx/sites-available/cofre.s3consultoria.net-unsafe.conf
+    dest: /etc/nginx/sites-enabled/cofre.s3consultoria.net.conf
     state: link
   notify:
     - nginx reload
@@ -108,12 +108,12 @@
 
 - name: run uacme to obtain a certificate for this service
   become: yes
-  command: "/usr/local/bin/acme-update-certs cripta.s3consultoria.net"
+  command: "/usr/local/bin/acme-update-certs cofre.s3consultoria.net"
   tags: [uacme, cert]
 
 - name: verify if the cert is valid
   become: yes
-  command: openssl x509 -checkend 86400 -noout -in /etc/ssl/uacme/cripta.s3consultoria.net/cert.pem
+  command: openssl x509 -checkend 86400 -noout -in /etc/ssl/uacme/cofre.s3consultoria.net/cert.pem
   register: cert_check
   changed_when: false
   failed_when: cert_check.rc != 0
@@ -122,8 +122,8 @@
 - name: link the safe nginx config file
   become: yes
   file:
-    src: /etc/nginx/sites-available/cripta.s3consultoria.net.conf
-    dest: /etc/nginx/sites-enabled/cripta.s3consultoria.net.conf
+    src: /etc/nginx/sites-available/cofre.s3consultoria.net.conf
+    dest: /etc/nginx/sites-enabled/cofre.s3consultoria.net.conf
     force: yes
     state: link
   notify:
