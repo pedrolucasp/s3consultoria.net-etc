@@ -1,0 +1,76 @@
+---
+- name: ensure deployer user exists
+  become: yes
+  user:
+    name: deployer
+    shell: /bin/bash
+    state: present
+
+- name: create .ssh directory for the deployer user
+  become: yes
+  file:
+    path: /home/deployer/.ssh
+    state: directory
+    owner: deployer
+    group: deployer
+    mode: '0700'
+
+- name: create a /srv/s3consultoria.net directory to store the website
+  become: yes
+  file:
+    state: directory
+    path: /srv/s3consultoria.net
+    owner: deployer
+    group: deployer
+
+- name: install the unsafe version of the nginx config file
+  become: yes
+  template:
+    src: nginx-unsafe.conf.j2
+    dest: /etc/nginx/sites-available/s3consultoria.net-unsafe.conf
+  notify:
+    - nginx reload
+  tags: [nginx, config]
+
+- name: install the safe version of the nginx config file
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/s3consultoria.net.conf
+  notify:
+    - nginx reload
+  tags: [nginx, config]
+
+- name: link the unsafe nginx config file first
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/s3consultoria.net-unsafe.conf
+    dest: /etc/nginx/sites-enabled/s3consultoria.net.conf
+    state: link
+  notify:
+    - nginx reload
+  tags: [nginx, config]
+
+- name: run uacme to obtain a certificate for this service
+  become: yes
+  command: "/usr/local/bin/acme-update-certs s3consultoria.net"
+  tags: [uacme, cert]
+
+- name: verify if the cert is valid
+  become: yes
+  command: openssl x509 -checkend 86400 -noout -in /etc/ssl/uacme/s3consultoria.net/cert.pem
+  register: cert_check
+  changed_when: false
+  failed_when: cert_check.rc != 0
+  tags: [uacme, cert]
+
+- name: link the safe nginx config file
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/s3consultoria.net.conf
+    dest: /etc/nginx/sites-enabled/s3consultoria.net.conf
+    force: yes
+    state: link
+  notify:
+    - nginx reload
+  tags: [nginx, config, safe]

@@ -1,0 +1,13 @@
+server {
+	server_name cofre.s3consultoria.net;
+	listen 80;
+
+	location / {
+		return 200;
+	}
+
+	location ^~ /.well-known {
+		root /var/www;
+	}
+}
+

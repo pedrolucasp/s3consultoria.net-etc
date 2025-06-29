@@ -1,0 +1,41 @@
+server {
+	server_name s3consultoria.net;
+	listen 80;
+
+	location / {
+		return 302 https://$server_name$request_uri;
+	}
+
+	location /metrics {
+		proxy_pass http://localhost:9100;
+		proxy_redirect off;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+	}
+
+	location ^~ /.well-known {
+		root /var/www;
+	}
+}
+
+
+server {
+	listen 443 ssl http2;
+	listen [::]:443 ssl http2;
+	server_name s3consultoria.net;
+	ssl_certificate /etc/ssl/uacme/s3consultoria.net/cert.pem;
+	ssl_certificate_key /etc/ssl/uacme/private/s3consultoria.net/key.pem;
+
+	gzip on;
+	gzip_types text/css;
+
+	location / {
+		root /srv/s3consultoria.net;
+	}
+
+	location ^~ /.well-known {
+		root /var/www;
+	}
+}
