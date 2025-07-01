@@ -1,0 +1,9 @@
+---
+- hosts: servers
+  become_method: doas
+
+  handlers:
+    - import_tasks: handlers/nginx.yml
+
+  roles:
+    - prometheus

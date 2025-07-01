@@ -1,0 +1,29 @@
+---
+
+- name: install node exporter for prometheus
+  become: true
+  apt:
+    name: prometheus-node-exporter
+    state: present
+
+- name: enable and start prometheus node exporter service
+  become: true
+  systemd:
+    name: prometheus-node-exporter
+    enabled: true
+    state: started
+
+- name: install server metrics config file
+  become: true
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/goiaba.s3consultoria.net.conf
+
+- name: link the server metrics config file
+  become: true
+  file:
+    src: /etc/nginx/sites-available/goiaba.s3consultoria.net.conf
+    dest: /etc/nginx/sites-enabled/goiaba.s3consultoria.net.conf
+    state: link
+  notify:
+    - nginx reload
