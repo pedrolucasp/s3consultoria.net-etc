@@ -53,6 +53,28 @@
     owner: acme
   tags: [prepare]
 
+- name: create dirs for each site
+  become: yes
+  loop: "{{ vhosts }}"
+  file:
+    path: "/etc/ssl/uacme/{{item}}"
+    state: directory
+    group: acme
+    owner: acme
+    mode: "g+rX"
+  tags: [prepare, acme-install]
+
+- name: create private dirs for each site
+  become: yes
+  loop: "{{ vhosts }}"
+  file:
+    path: "/etc/ssl/uacme/private/{{item}}"
+    state: directory
+    group: acme
+    owner: acme
+    mode: "g+rX"
+  tags: [prepare, acme-install]
+
 - name: create acme log
   become: yes
   loop: "{{ vhosts }}"
@@ -74,8 +96,18 @@
     - acme-install
 
 - name: renew certs
+  become: yes
+  become_user: acme
   loop: "{{ vhosts }}"
   ansible.builtin.command: "/usr/local/bin/acme-update-certs {{ item }}"
-  notify: nginx reload
+  tags:
+    - renew-certs
+
+  # TODO: There is a weird bug with doas and acme permissions
+- name: reload nginx
+  become: yes
+  service:
+    name: nginx
+    state: reloaded
   tags:
     - renew-certs
